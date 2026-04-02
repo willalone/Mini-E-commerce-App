@@ -45,3 +45,6 @@ npm test
 ```bash
 npm run build
 ```
+# Vercel
+https://mini-e-commerce-app-beta.vercel.app/
+
