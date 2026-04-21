@@ -1,86 +1,25 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { getAllProducts } from '../api/products'
-import type { Product } from '../types'
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
+import { useAdminProductsTableStore } from '../stores/adminProductsTable'
 import PaginationBar from './PaginationBar.vue'
 
-type SortKey = 'title' | 'price' | 'rating'
+const store = useAdminProductsTableStore()
+const {
+  items,
+  isLoading,
+  loadError,
+  selectedCategory,
+  categoriesFromData,
+  sorted,
+  pageRows,
+  totalPages,
+  page,
+} = storeToRefs(store)
 
-const products = ref<Product[]>([])
-const isLoading = ref(true)
-const loadError = ref<string | null>(null)
-
-const selectedCategory = ref('')
-const sortKey = ref<SortKey>('title')
-const sortAsc = ref(true)
-const page = ref(1)
-const perPage = 10
-
-const categoriesFromData = computed(() => {
-  const set = new Set(products.value.map((p) => p.category))
-  return Array.from(set).sort((a, b) => a.localeCompare(b))
+onMounted(() => {
+  void store.load()
 })
-
-const filtered = computed(() => {
-  if (!selectedCategory.value) return products.value
-  return products.value.filter((p) => p.category === selectedCategory.value)
-})
-
-const sorted = computed(() => {
-  const list = [...filtered.value]
-  const dir = sortAsc.value ? 1 : -1
-  const key = sortKey.value
-  list.sort((a, b) => {
-    if (key === 'title') return dir * a.title.localeCompare(b.title, 'ru')
-    if (key === 'price') return dir * (a.price - b.price)
-    return dir * (a.rating - b.rating)
-  })
-  return list
-})
-
-const totalPages = computed(() => Math.max(1, Math.ceil(sorted.value.length / perPage)))
-
-const pageRows = computed(() => {
-  const start = (page.value - 1) * perPage
-  return sorted.value.slice(start, start + perPage)
-})
-
-watch([selectedCategory, sortKey, sortAsc], () => {
-  page.value = 1
-})
-
-watch(sorted, () => {
-  if (page.value > totalPages.value) page.value = totalPages.value
-})
-
-function toggleSort(key: SortKey) {
-  if (sortKey.value === key) {
-    sortAsc.value = !sortAsc.value
-  } else {
-    sortKey.value = key
-    sortAsc.value = true
-  }
-}
-
-function sortIndicator(key: SortKey) {
-  if (sortKey.value !== key) return ''
-  return sortAsc.value ? '↑' : '↓'
-}
-
-async function load() {
-  isLoading.value = true
-  loadError.value = null
-  try {
-    products.value = await getAllProducts()
-  } catch (e) {
-    loadError.value = 'Не удалось загрузить товары'
-    console.error(e)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-onMounted(load)
 </script>
 
 <template>
@@ -95,14 +34,14 @@ onMounted(load)
       </label>
       <p v-if="!isLoading && !loadError" class="admin-table__meta">
         Показано {{ pageRows.length }} из {{ sorted.length }}
-        <template v-if="products.length !== sorted.length"> (всего в базе {{ products.length }})</template>
+        <template v-if="items.length !== sorted.length"> (всего в базе {{ items.length }})</template>
       </p>
     </div>
 
     <div v-if="isLoading" class="admin-table__status">Загрузка…</div>
     <div v-else-if="loadError" class="admin-table__status admin-table__status--error">
       {{ loadError }}
-      <button type="button" class="admin-table__retry" @click="load">Повторить</button>
+      <button type="button" class="admin-table__retry" @click="store.load()">Повторить</button>
     </div>
     <template v-else>
       <div class="admin-table__scroll">
@@ -112,19 +51,19 @@ onMounted(load)
               <th class="admin-table__th admin-table__th--narrow">ID</th>
               <th class="admin-table__th admin-table__th--thumb">Фото</th>
               <th class="admin-table__th admin-table__th--sortable" scope="col">
-                <button type="button" class="admin-table__sort" @click="toggleSort('title')">
-                  Название <span class="admin-table__sort-mark">{{ sortIndicator('title') }}</span>
+                <button type="button" class="admin-table__sort" @click="store.toggleSort('title')">
+                  Название <span class="admin-table__sort-mark">{{ store.sortIndicator('title') }}</span>
                 </button>
               </th>
               <th class="admin-table__th">Категория</th>
               <th class="admin-table__th admin-table__th--sortable admin-table__th--num" scope="col">
-                <button type="button" class="admin-table__sort" @click="toggleSort('price')">
-                  Цена <span class="admin-table__sort-mark">{{ sortIndicator('price') }}</span>
+                <button type="button" class="admin-table__sort" @click="store.toggleSort('price')">
+                  Цена <span class="admin-table__sort-mark">{{ store.sortIndicator('price') }}</span>
                 </button>
               </th>
               <th class="admin-table__th admin-table__th--sortable admin-table__th--num" scope="col">
-                <button type="button" class="admin-table__sort" @click="toggleSort('rating')">
-                  Рейтинг <span class="admin-table__sort-mark">{{ sortIndicator('rating') }}</span>
+                <button type="button" class="admin-table__sort" @click="store.toggleSort('rating')">
+                  Рейтинг <span class="admin-table__sort-mark">{{ store.sortIndicator('rating') }}</span>
                 </button>
               </th>
             </tr>
@@ -146,7 +85,7 @@ onMounted(load)
         </table>
       </div>
 
-      <PaginationBar :current="page" :total="totalPages" @change="(p) => (page = p)" />
+      <PaginationBar :current="page" :total="totalPages" @change="store.setPage" />
     </template>
   </div>
 </template>

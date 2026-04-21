@@ -5,7 +5,10 @@ import AdminProductsTable from '../components/AdminProductsTable.vue'
 <template>
   <section class="admin">
     <h1 class="admin__title">Админ-панель</h1>
-    <p class="admin__lead">Таблица товаров из dummyjson: фильтр по категории, сортировка по колонкам, пагинация на клиенте.</p>
+    <h2 class="admin__subtitle">Список товаров</h2>
+    <p class="admin__lead">
+      Данные из DummyJSON; состояние таблицы (фильтр, сортировка, страница) в Pinia — как в типичном SPA с «тяжёлыми» списками и статистикой.
+    </p>
     <AdminProductsTable />
   </section>
 </template>
@@ -14,8 +17,15 @@ import AdminProductsTable from '../components/AdminProductsTable.vue'
 .admin__title {
   font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   color: #0f172a;
+}
+
+.admin__subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: #334155;
 }
 
 .admin__lead {
