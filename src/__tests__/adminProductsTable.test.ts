@@ -44,4 +44,12 @@ describe('adminProductsTable store', () => {
     store.toggleSort('price')
     expect(store.sorted.map((p) => p.id)).toEqual([1, 3, 2])
   })
+
+  it('фильтрует по диапазону цены', async () => {
+    const store = useAdminProductsTableStore()
+    await store.load()
+    store.priceMin = 15
+    store.priceMax = 25
+    expect(store.filtered.map((p) => p.id)).toEqual([3])
+  })
 })

@@ -7,7 +7,7 @@ import AdminProductsTable from '../components/AdminProductsTable.vue'
     <h1 class="admin__title">Админ-панель</h1>
     <h2 class="admin__subtitle">Список товаров</h2>
     <p class="admin__lead">
-      Данные из DummyJSON; состояние таблицы (фильтр, сортировка, страница) в Pinia — как в типичном SPA с «тяжёлыми» списками и статистикой.
+      Данные из DummyJSON; фильтры (категория, цена), сортировка и пагинация в Pinia — как в типичном SPA со списками и табличной аналитикой.
     </p>
     <AdminProductsTable />
   </section>

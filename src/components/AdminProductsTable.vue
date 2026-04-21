@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 import { useAdminProductsTableStore } from '../stores/adminProductsTable'
+import AdminProductsToolbar from './AdminProductsToolbar.vue'
 import PaginationBar from './PaginationBar.vue'
 
 const store = useAdminProductsTableStore()
@@ -10,6 +11,8 @@ const {
   isLoading,
   loadError,
   selectedCategory,
+  priceMin,
+  priceMax,
   categoriesFromData,
   sorted,
   pageRows,
@@ -25,13 +28,16 @@ onMounted(() => {
 <template>
   <div class="admin-table">
     <div class="admin-table__toolbar">
-      <label class="admin-table__filter">
-        <span>Категория</span>
-        <select v-model="selectedCategory" class="admin-table__select">
-          <option value="">Все</option>
-          <option v-for="c in categoriesFromData" :key="c" :value="c">{{ c }}</option>
-        </select>
-      </label>
+      <AdminProductsToolbar
+        :categories="categoriesFromData"
+        :category="selectedCategory"
+        :price-min="priceMin"
+        :price-max="priceMax"
+        :disabled="isLoading || !!loadError"
+        @update:category="(v) => (store.selectedCategory = v)"
+        @update:price-min="(v) => (store.priceMin = v)"
+        @update:price-max="(v) => (store.priceMax = v)"
+      />
       <p v-if="!isLoading && !loadError" class="admin-table__meta">
         Показано {{ pageRows.length }} из {{ sorted.length }}
         <template v-if="items.length !== sorted.length"> (всего в базе {{ items.length }})</template>
@@ -95,7 +101,6 @@ $border: #e2e8f0;
 $header-bg: #0f172a;
 $header-fg: #f8fafc;
 $row-hover: #f1f5f9;
-$accent: #2563eb;
 $muted: #64748b;
 
 .admin-table {
@@ -113,28 +118,6 @@ $muted: #64748b;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
-}
-
-.admin-table__filter {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: $muted;
-}
-
-.admin-table__select {
-  min-width: 200px;
-  padding: 8px 10px;
-  border: 1px solid $border;
-  border-radius: 8px;
-  background: #fff;
-
-    &:focus {
-      outline: 2px solid rgba(37, 99, 235, 0.35);
-      border-color: $accent;
-    }
 }
 
 .admin-table__meta {

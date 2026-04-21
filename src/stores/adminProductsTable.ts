@@ -11,6 +11,10 @@ export const useAdminProductsTableStore = defineStore('adminProductsTable', () =
   const loadError = ref<string | null>(null)
 
   const selectedCategory = ref('')
+  /** 0 — без нижней границы. */
+  const priceMin = ref(0)
+  /** 0 — без верхней границы. */
+  const priceMax = ref(0)
   const sortKey = ref<AdminSortKey>('title')
   const sortAsc = ref(true)
   const page = ref(1)
@@ -22,8 +26,17 @@ export const useAdminProductsTableStore = defineStore('adminProductsTable', () =
   })
 
   const filtered = computed(() => {
-    if (!selectedCategory.value) return items.value
-    return items.value.filter((p) => p.category === selectedCategory.value)
+    let list = items.value
+    if (selectedCategory.value) {
+      list = list.filter((p) => p.category === selectedCategory.value)
+    }
+    if (priceMin.value > 0) {
+      list = list.filter((p) => p.price >= priceMin.value)
+    }
+    if (priceMax.value > 0) {
+      list = list.filter((p) => p.price <= priceMax.value)
+    }
+    return list
   })
 
   const sorted = computed(() => {
@@ -61,6 +74,20 @@ export const useAdminProductsTableStore = defineStore('adminProductsTable', () =
   )
   watch(
     sortAsc,
+    () => {
+      page.value = 1
+    },
+    { flush: 'sync' },
+  )
+  watch(
+    priceMin,
+    () => {
+      page.value = 1
+    },
+    { flush: 'sync' },
+  )
+  watch(
+    priceMax,
     () => {
       page.value = 1
     },
@@ -111,6 +138,8 @@ export const useAdminProductsTableStore = defineStore('adminProductsTable', () =
     isLoading,
     loadError,
     selectedCategory,
+    priceMin,
+    priceMax,
     sortKey,
     sortAsc,
     page,
