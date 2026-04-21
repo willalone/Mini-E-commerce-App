@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShoppingBag, Heart, ShoppingCart } from 'lucide-vue-next'
+import { ShoppingBag, Heart, ShoppingCart, LayoutDashboard } from 'lucide-vue-next'
 import { useCartStore } from '../stores/cart'
 import { useFavoritesStore } from '../stores/favorites'
 
@@ -17,6 +17,10 @@ const fav = useFavoritesStore()
 
       <nav class="nav">
         <router-link to="/" class="nav-link" exact-active-class="active">Каталог</router-link>
+
+        <router-link to="/admin" class="nav-link" active-class="active" title="Админ">
+          <LayoutDashboard :size="18" />
+        </router-link>
 
         <router-link to="/favorites" class="nav-link" active-class="active">
           <Heart :size="18" />
